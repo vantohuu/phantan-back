@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.models.ChangePassword;
 import com.example.demo.models.ResponseObject;
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserReponsitory;
@@ -67,7 +68,7 @@ public class UserController {
     }
 
     @PutMapping("/{username}")
-    ResponseEntity<ResponseObject> putProduct(@RequestBody User newUser, @PathVariable String username) {
+    ResponseEntity<ResponseObject> putAccount(@RequestBody User newUser, @PathVariable String username) {
         User updateUser = repositories.findById(username).map(
                 user -> {
                     user.setUsername(newUser.getUsername());
@@ -84,4 +85,24 @@ public class UserController {
                 new ResponseObject("success", "update user successfully", updateUser)
         );
     }
+
+    @PutMapping("/change-password")
+    ResponseEntity<ResponseObject> changePassWord(@RequestBody ChangePassword changePassword) {
+        Optional<User> foundUser = repositories.findById(changePassword.getUsername().trim());
+        if (foundUser.isPresent() && foundUser.get().getPassword().equals(changePassword.getOldPassword())) {
+            foundUser.get().setPassword(changePassword.getNewPassword());
+            repositories.save(foundUser.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("success", "changed password successfully", foundUser)
+            );
+        }
+        else
+        {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("failed", "user is not exists", foundUser)
+            );
+        }
+    }
+
+
 }

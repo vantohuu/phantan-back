@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Queue;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "ve/")
 public class VeController {
     Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -49,7 +50,10 @@ public class VeController {
     List<CTVe> getAllOderVe() {
         return ctveRepository.getAllOrderVe();
     }
-
+//    @RequestMapping(value = "/order-ticket",method = RequestMethod.OPTIONS)
+//    public ResponseEntity handle() {
+//        return new ResponseEntity(HttpStatus.OK);
+//    }
     @PutMapping("/order-ticket")
     ResponseEntity<ResponseObject> putVe(@RequestBody CTVe newctVe) {
         while (QueueClass.isFlag() || !QueueClass.getPriorityUser().equals(newctVe.getUsername())) {}
