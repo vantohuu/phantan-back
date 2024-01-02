@@ -31,10 +31,9 @@ public class VeFilter implements Filter {
 
         System.out.println("DO FILTER");
         System.out.println(((HttpServletRequest) request).getMethod());
-
         if ("OPTIONS".equals(((HttpServletRequest) request).getMethod())) {
             resp.setStatus(HttpServletResponse.SC_OK);
-            System.out.println("A1");
+//            System.out.println("A1");
             resp.setHeader("Access-Control-Allow-Origin", "*");
             resp.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             resp.setHeader("Access-Control-Allow-Headers", "*");
@@ -42,20 +41,22 @@ public class VeFilter implements Filter {
         } else {
             CachedBodyHttpServletRequest cachedBodyHttpServletRequest =
                     new CachedBodyHttpServletRequest((HttpServletRequest) request);
-            System.out.println("A2");
 
             byte[] body = StreamUtils.copyToByteArray(cachedBodyHttpServletRequest.getInputStream());
 
             Map<String, Object> jsonRequest = new ObjectMapper().readValue(body, Map.class);
-            System.out.println("AAAA");
-
             String username = (String) jsonRequest.get("username");
+            System.out.println("Push Queue: " + username);
             QueueClass.addUser(username);
-            System.out.println("Remote Host:"+request.getRemoteHost());
-            System.out.println("Remote Address:"+request.getRemoteAddr());
+            int count = 0;
             for (String i : QueueClass.getUserQueue()) {
-                System.out.println("username:" + i);
-
+                count++;
+                System.out.println(count + ".username:" + i);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             chain.doFilter((ServletRequest) cachedBodyHttpServletRequest, response);
         }

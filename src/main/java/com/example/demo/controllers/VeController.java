@@ -56,7 +56,13 @@ public class VeController {
 //    }
     @PutMapping("/order-ticket")
     ResponseEntity<ResponseObject> putVe(@RequestBody CTVe newctVe) {
-        while (QueueClass.isFlag() || !QueueClass.getPriorityUser().equals(newctVe.getUsername())) {}
+//        while (QueueClass.isFlag()) {
+////            System.out.println(QueueClass.isFlag());
+//        }
+        while (QueueClass.isFlag() || (QueueClass.getPriorityUser() != null && !QueueClass.getPriorityUser().equals(newctVe.getUsername()))) {
+            System.out.println(QueueClass.getPriorityUser() + "   " + newctVe.getUsername());
+        }
+        System.out.println("Begin order: " + QueueClass.getPriorityUser());
         QueueClass.setFlag(true);
         System.out.println(newctVe.toString());
         Optional<Ve> foundVe = veRepository.findById(newctVe.getIDVE());
@@ -66,8 +72,11 @@ public class VeController {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            QueueClass.removeUser();
+            System.out.println("Removed user (order failed): "  + QueueClass.removeUser() + "\n foundVe:" + foundVe );
             QueueClass.setFlag(false);
+            PrintQueueUser();
+            System.out.println("Flag: " + QueueClass.isFlag() + "\n");
+
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("failed", "ticket is ordered", newctVe)
             );
@@ -77,12 +86,14 @@ public class VeController {
         ctveRepository.save(newctVe);
         veRepository.save(newVe);
         try {
-            Thread.sleep(10000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        QueueClass.removeUser();
+        System.out.println("\n Removed user (order success): "  + QueueClass.removeUser());
         QueueClass.setFlag(false);
+        PrintQueueUser();
+        System.out.println("Flag: " + QueueClass.isFlag() + "\n");
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("success", "update detail ticket successfully", newctVe)
         );
@@ -96,5 +107,13 @@ public class VeController {
         );
     }
 
+    void PrintQueueUser()
+    {
+           int count = 0;
+            for (String i : QueueClass.getUserQueue()) {
+                count++;
+                System.out.println(count + ".username:" + i);
+            }
+    }
 
 }
