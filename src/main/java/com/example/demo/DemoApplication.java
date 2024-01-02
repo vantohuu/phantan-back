@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 //@ServletComponentScan
-//@ComponentScan(basePackages = {"com.example.demo.controllers"})
+//@ComponentScan
 public class DemoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
